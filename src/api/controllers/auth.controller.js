@@ -1,13 +1,15 @@
 const httpStatus = require('http-status');
 const moment = require('moment-timezone');
 const { omit } = require('lodash');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user.model');
 const RefreshToken = require('../models/refreshToken.model');
 const PasswordResetToken = require('../models/passwordResetToken.model');
 const { jwtExpirationInterval } = require('../../config/vars');
 const APIError = require('../errors/api-error');
 const emailProvider = require('../services/emails/emailProvider');
-
 /**
  * Returns a formatted object with tokens
  * @private
@@ -31,6 +33,12 @@ function generateTokenResponse(user, accessToken) {
 exports.register = async (req, res, next) => {
   try {
     const userData = omit(req.body, 'role');
+    const { picture } = userData;
+    const buffer = Buffer.from(picture, 'base64');
+    const newUUid = `${uuidv4()}.jpeg`;
+    fs.writeFileSync(path.join(__dirname, '../../..', 'public', 'images', newUUid), buffer);
+    const picturePath = path.join('static', 'images', newUUid);
+    userData.picture = picturePath;
     const user = await new User(userData).save();
     const userTransformed = user.transform();
     const token = generateTokenResponse(user, user.token());
