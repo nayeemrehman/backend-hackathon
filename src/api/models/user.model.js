@@ -51,6 +51,50 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  dob: {
+    type: Date,
+  },
+  mobile: {
+    type: Number,
+  },
+  address: {
+    state: {
+      type: String,
+      trim: true,
+      minlength: 3,
+      maxlength: 100,
+    },
+    country: {
+      type: String,
+      trim: true,
+      minlength: 3,
+      maxlength: 100,
+    },
+  },
+  about: {
+    type: String,
+    trim: true,
+  },
+  office: {
+    name: {
+      type: String,
+      trim: true,
+    },
+    team: {
+      type: String,
+      trim: true,
+    },
+    role: {
+      type: String,
+      trim: true,
+    },
+    skillSet: {
+      type: [String],
+    },
+  },
+  interests: {
+    type: [String],
+  },
 }, {
   timestamps: true,
 });

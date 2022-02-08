@@ -78,6 +78,19 @@ exports.update = (req, res, next) => {
 };
 
 /**
+ * Update existing user
+ * @public
+ */
+exports.updateProfile = (req, res, next) => {
+  // const ommitRole = req.locals.user.role !== 'admin' ? 'role' : '';
+  // const updatedUser = omit(req.body, ommitRole);
+  const user = Object.assign(req.locals.user, req.body);
+
+  user.save()
+    .then((savedUser) => res.json(savedUser.transform()))
+    .catch((e) => next(User.checkDuplicateEmail(e)));
+};
+/**
  * Get user list
  * @public
  */
