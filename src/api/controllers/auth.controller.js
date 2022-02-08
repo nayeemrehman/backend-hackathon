@@ -9,7 +9,7 @@ const APIError = require('../errors/api-error');
 const emailProvider = require('../services/emails/emailProvider');
 
 /**
- * Returns a formated object with tokens
+ * Returns a formatted object with tokens
  * @private
  */
 function generateTokenResponse(user, accessToken) {

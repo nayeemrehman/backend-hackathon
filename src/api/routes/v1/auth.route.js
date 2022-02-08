@@ -29,7 +29,7 @@ const router = express.Router();
  * @apiSuccess (Created 201) {String}  token.refreshToken  Token to get a new accessToken
  *                                                   after expiration time
  * @apiSuccess (Created 201) {Number}  token.expiresIn     Access Token's expiration time
- *                                                   in miliseconds
+ *                                                   in milliseconds
  * @apiSuccess (Created 201) {String}  token.timezone      The server's Timezone
  *
  * @apiSuccess (Created 201) {String}  user.id         User's id

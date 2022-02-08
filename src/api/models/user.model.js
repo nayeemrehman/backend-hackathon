@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
   },
   dob: {
-    type: Date,
+    type: String,
   },
   mobile: {
     type: Number,
@@ -126,7 +126,7 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt'];
+    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt', 'dob', 'address', 'about', 'office', 'interests'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
