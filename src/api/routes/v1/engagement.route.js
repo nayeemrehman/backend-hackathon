@@ -13,9 +13,9 @@ const router = express.Router();
  */
 router.param('engagementId', controller.load);
 
-// router
-//   .route('/guesswho')
-//   .get(authorize(), controller.guesswho);
+router
+  .route('/todaysengagement')
+  .get(authorize(), controller.todaysengagement);
 
 router
   .route('/')
@@ -167,8 +167,8 @@ router
 //    * @apiError (Not Found 404)    NotFound      User does not exist
 //    */
 //   .delete(authorize(LOGGED_USER), controller.remove);
-router
-  .route('/:engagementId/guesswho')
-  .get(authorize(), controller.guesswho);
+// router
+//   .route('/:engagementId/guesswho')
+//   .get(authorize(), controller.guesswho);
 
 module.exports = router;

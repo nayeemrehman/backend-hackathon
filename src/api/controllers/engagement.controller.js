@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-// const { omit } = require('lodash');
+const { shuffle } = require('lodash');
 const User = require('../models/user.model');
 const EngagementActivity = require('../models/engagementActivity.model');
 
@@ -39,63 +39,75 @@ exports.create = async (req, res, next) => {
 
     const users = await User.list(req.query);
     let transformedUsers = users.map((user) => user.transform());
-    transformedUsers = transformedUsers.filter(
-      (user) => user.id !== req.user._id.toString() && user.role === 'user',
-    );
+    transformedUsers = transformedUsers.filter((user) => user.role === 'user');
 
-    const set = []; // new Set();
+    const QuestionAnswers = []; // new Set();
 
-    while (transformedUsers.length >= 2) {
-      const r1 = Math.random() * transformedUsers.length;
-      const person1 = transformedUsers.splice(r1, 1)[0];
+    transformedUsers.forEach((user) => {
+      //   console.log("user1 : ",shuffle(transformedUsers));
+      const tr1 = shuffle(transformedUsers)
+        .filter((cu) => cu.id !== user.id)
+        .slice(0, 2);
+      const question = {
+        questionImage:
+          user.picture || 'https://picsum.photos/seed/picsum/200/300',
+        questionName: engagement.name,
+        questionOptions: [tr1[0].name, user.name, tr1[1].name],
+        answerPersonName: user.name,
+      };
 
-      const r2 = Math.random() * transformedUsers.length;
-      const person2 = transformedUsers.splice(r2, 1)[0];
+      QuestionAnswers.push(question);
+    });
+    //   const r1 = Math.random() * transformedUsers.length;
+    //   const person1 = [...transformedUsers].splice(r1, 1)[0];
 
-      let remainingTwoPersonNames = transformedUsers.filter(
-        (user) => user.id !== person1.id && user.id !== person2.id,
-      );
-      remainingTwoPersonNames = remainingTwoPersonNames.map(
-        (user) => user.name,
-      ).slice(2);
+    //   const r2 = Math.random() * transformedUsers.length;
+    //   const person2 = [...transformedUsers].splice(r2, 1)[0];
 
-      console.log(remainingTwoPersonNames);
+    //   let remainingTwoPersonNames = transformedUsers.filter(
+    //     (user) => user.id !== person1.id && user.id !== person2.id,
+    //   );
+    //   remainingTwoPersonNames = remainingTwoPersonNames.map(
+    //     (user) => user.name,
+    //   ).slice(2);
 
-      const questions = [
-        {
-          questionImage: person2.picture || 'https://picsum.photos/seed/picsum/200/300',
-          questionName: person2.name,
-          questionOptions: [
-            ...remainingTwoPersonNames,
-            person1.name,
-            person2.name,
-          ],
-          answerPersonName: person2.name,
-          answerPersonImage: person2.picture || 'https://picsum.photos/seed/picsum/200/300',
-        },
-        {
-          questionImage: person1.picture || 'https://picsum.photos/seed/picsum/200/300',
-          questionName: person1.name,
-          questionOptions: [
-            ...remainingTwoPersonNames,
-            person1.name,
-            person2.name,
-          ],
-          answerPersonName: person1.name,
-          answerPersonImage: person1.picture || 'https://picsum.photos/seed/picsum/200/300',
-        },
-      ];
+    //   console.log("users1 : ",shuffle(transformedUsers));
 
-      set.push(...questions);
-      //   console.log(`from: ${person1.name} to: ${person2.name}`);
-    }
+    //   const questions = [
+    //     {
+    //       questionImage: person2.picture || 'https://picsum.photos/seed/picsum/200/300',
+    //       questionName: person2.name,
+    //       questionOptions: [
+    //         ...remainingTwoPersonNames,
+    //         person1.name,
+    //         person2.name,
+    //       ],
+    //       answerPersonName: person2.name,
+    //       answerPersonImage: person2.picture || 'https://picsum.photos/seed/picsum/200/300',
+    //     },
+    //     {
+    //       questionImage: person1.picture || 'https://picsum.photos/seed/picsum/200/300',
+    //       questionName: person1.name,
+    //       questionOptions: [
+    //         ...remainingTwoPersonNames,
+    //         person1.name,
+    //         person2.name,
+    //       ],
+    //       answerPersonName: person1.name,
+    //       answerPersonImage: person1.picture || 'https://picsum.photos/seed/picsum/200/300',
+    //     },
+    //   ];
+
+    //   set.push(...questions);
+    //   console.log(`from: ${person1.name} to: ${person2.name}`);
+    // }
 
     // for (let [key, value] of set.entries())
     // {
     //     console.log(`from: ${key.from}: ${value.name} to:`);
     // }
 
-    engagement.questionanswers = set;
+    engagement.questionanswers = QuestionAnswers;
     // await currentEngagement.save();
 
     const savedEngagement = await engagement.save();
@@ -196,4 +208,20 @@ exports.guesswho = async (req, res, next) => {
     // console.log('engusers1 error : ', error);
     next(error);
   }
+};
+
+exports.todaysengagement = async (req, res, next) => {
+  const engagements = await EngagementActivity.list({
+    date: new Date().toDateString(),
+  });
+  const allquestionanswers = engagements.map((engagement) => {
+    const questionanswers = engagement.questionanswers.filter(
+      (qa) => qa.answerPersonName !== req.user.name,
+    );
+    return {
+      _id: engagement._id,
+      questionanswers,
+    };
+  });
+  res.json(allquestionanswers);
 };

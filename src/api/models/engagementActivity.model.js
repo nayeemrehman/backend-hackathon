@@ -57,6 +57,13 @@ engagementActivitySchema.statics = {
       status: httpStatus.NOT_FOUND,
     });
   },
+  list(query) {
+    // const options = { name, description };
+
+    return this.find(query)
+      .sort({ createdAt: -1 })
+      .exec();
+  },
 };
 
 /**
