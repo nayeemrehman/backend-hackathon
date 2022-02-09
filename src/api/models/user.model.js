@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
   mobile: {
-    type: Number,
+    type: String,
   },
   address: {
     city: {
@@ -75,13 +75,13 @@ const userSchema = new mongoose.Schema({
     state: {
       type: String,
       trim: true,
-      minlength: 3,
+      minlength: 2,
       maxlength: 100,
     },
     country: {
       type: String,
       trim: true,
-      minlength: 3,
+      minlength: 2,
       maxlength: 100,
     },
   },
@@ -111,6 +111,10 @@ const userSchema = new mongoose.Schema({
     books: String,
     music: String,
     sports: String,
+  },
+  engagementScore: {
+    type: Number,
+    default: 0,
   },
 }, {
   timestamps: true,
@@ -143,7 +147,7 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt', 'dob', 'address', 'about', 'office', 'interests', 'social'];
+    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt', 'dob', 'address', 'about', 'office', 'interests', 'social', 'mobile'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
