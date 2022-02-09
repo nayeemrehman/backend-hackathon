@@ -42,6 +42,14 @@ const userSchema = new mongoose.Schema({
     facebook: String,
     google: String,
   },
+  social: {
+    facebook: String,
+    twitter: String,
+    instagram: String,
+    linkedin: String,
+    snapchat: String,
+    stackoverflow: String,
+  },
   role: {
     type: String,
     enum: roles,
@@ -58,6 +66,12 @@ const userSchema = new mongoose.Schema({
     type: Number,
   },
   address: {
+    city: {
+      type: String,
+      trim: true,
+      minlength: 3,
+      maxlength: 100,
+    },
     state: {
       type: String,
       trim: true,
@@ -93,7 +107,10 @@ const userSchema = new mongoose.Schema({
     },
   },
   interests: {
-    type: [String],
+    food: String,
+    books: String,
+    music: String,
+    sports: String,
   },
 }, {
   timestamps: true,
@@ -126,7 +143,7 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt', 'dob', 'address', 'about', 'office', 'interests'];
+    const fields = ['id', 'name', 'email', 'picture', 'role', 'createdAt', 'dob', 'address', 'about', 'office', 'interests', 'social'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
