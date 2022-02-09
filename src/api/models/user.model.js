@@ -239,8 +239,19 @@ userSchema.statics = {
    * @returns {Promise<User[]>}
    */
   list({
-    page = 1, perPage = 30, name, email, role,
+    page = 1, perPage = 30, name, email, role, q,
   }) {
+    if (q) {
+      return this.find({ $text: { $search: q } })
+        .sort({ createdAt: -1 })
+        .skip(perPage * (page - 1))
+        .limit(perPage)
+        .exec();
+    }
+    // return this.find(options)
+    // eslint-disable-next-line max-len
+    // const arrOptions = Object.keys(options).map((option) => ({ option: { $regex: options[option], $options: 'i' } }));
+    // eslint-disable-next-line max-len
     const options = omitBy({ name, email, role }, isNil);
 
     return this.find(options)
@@ -291,6 +302,17 @@ userSchema.statics = {
   },
 };
 
+userSchema.index({
+  // eslint-disable-next-line no-dupe-keys
+  name: 'text',
+  email: 'text',
+  'address.state': 'text',
+  'address.country': 'text',
+  'interests.food': 'text',
+  'interests.books': 'text',
+  'interests.music': 'text',
+  'interests.sports': 'text',
+});
 /**
  * @typedef User
  */

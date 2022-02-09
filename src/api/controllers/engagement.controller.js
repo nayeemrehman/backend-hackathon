@@ -4,6 +4,13 @@ const User = require("../models/user.model");
 const EngagementActivity = require("../models/engagementActivity.model");
 const GuessWhoResponse = require("../models/guessWhoResponse.model");
 
+const EnggTypeMap = {
+  "guesswho": "Guess Who",
+  "online": "Online Game",
+  "riddle": "Riddle",
+  "mcq": "Multiple Choice Questions"
+}
+
 /**
  * Load user and append to req.
  * @public
@@ -168,19 +175,18 @@ exports.create = async (req, res, next) => {
 //     .then((savedUser) => res.json(savedUser.transform()))
 //     .catch((e) => next(User.checkDuplicateEmail(e)));
 // };
-// /**
-//  * Get user list
-//  * @public
-//  */
-// exports.list = async (req, res, next) => {
-//   try {
-//     const users = await User.list(req.query);
-//     const transformedUsers = users.map((user) => user.transform());
-//     res.json(transformedUsers);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+/**
+ * Get user list
+ * @public
+ */
+exports.list = async (req, res, next) => {
+  try {
+    const engagements = await EngagementActivity.list();
+    res.json(engagements);
+  } catch (error) {
+    next(error);
+  }
+};
 
 // /**
 //  * Delete user
@@ -274,6 +280,7 @@ exports.saveResponse = async (req, res, next) => {
 
     userGuess.engagementActivityName = engagement.name;
     userGuess.engagementActivityDescription = engagement.description;
+    userGuess.engagementActivityType = engagement.type;
     const savedUserGuess = await userGuess.save();
     res.status(httpStatus.OK);
     res.json(savedUserGuess);
@@ -327,6 +334,34 @@ exports.getScoreAndAllActivities = async (req, res, next) => {
 
     res.status(httpStatus.OK);
     res.json({"score": score[0].sum, "recentEngagements": recentEngagements});
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.dashboardDetails = async (req, res, next) => {
+  try {
+    const engagements = await EngagementActivity.list();
+    const totalUsers = await User.list(req.query);
+
+    const details = await Promise.all(engagements.map(async engg => {
+
+    const participatedUsers = await GuessWhoResponse.find({engagementActivityId: engg._id.toString()});
+
+    const participation = Math.floor(((participatedUsers.length)/ totalUsers.length) * 100)
+
+      return {
+        name: engg.name,
+        category: EnggTypeMap[engg.type],
+        date: engg.date,
+        numofUsers: totalUsers.length,
+        numOfParticipants: participatedUsers.length,
+        participation: participation 
+      }
+    }));
+
+    res.status(httpStatus.OK);
+    res.json(details)
   } catch (error) {
     next(error)
   }
