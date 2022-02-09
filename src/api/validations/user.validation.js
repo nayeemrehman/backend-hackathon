@@ -11,6 +11,7 @@ module.exports = {
       name: Joi.string(),
       email: Joi.string(),
       role: Joi.string().valid(User.roles),
+      q: Joi.string(),
     },
   },
 
