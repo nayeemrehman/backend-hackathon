@@ -1,7 +1,8 @@
-const httpStatus = require('http-status');
-const { shuffle } = require('lodash');
-const User = require('../models/user.model');
-const EngagementActivity = require('../models/engagementActivity.model');
+const httpStatus = require("http-status");
+const { shuffle } = require("lodash");
+const User = require("../models/user.model");
+const EngagementActivity = require("../models/engagementActivity.model");
+const GuessWhoResponse = require("../models/guessWhoResponse.model");
 
 /**
  * Load user and append to req.
@@ -39,7 +40,7 @@ exports.create = async (req, res, next) => {
 
     const users = await User.list(req.query);
     let transformedUsers = users.map((user) => user.transform());
-    transformedUsers = transformedUsers.filter((user) => user.role === 'user');
+    transformedUsers = transformedUsers.filter((user) => user.role === "user");
 
     const QuestionAnswers = []; // new Set();
 
@@ -50,10 +51,11 @@ exports.create = async (req, res, next) => {
         .slice(0, 2);
       const question = {
         questionImage:
-          user.picture || 'https://picsum.photos/seed/picsum/200/300',
+          user.picture || "https://picsum.photos/seed/picsum/200/300",
         questionName: engagement.name,
         questionOptions: [tr1[0].name, user.name, tr1[1].name],
         answerPersonName: user.name,
+        answerPersonId: user.id,
       };
 
       QuestionAnswers.push(question);
@@ -200,7 +202,7 @@ exports.guesswho = async (req, res, next) => {
   try {
     const currentEngagement = req.locals.engagement;
     const questionanswers = currentEngagement.questionanswers.filter(
-      (qa) => qa.answerPersonName !== req.user.name,
+      (qa) => qa.answerPersonName !== req.user.name
     );
     res.status(httpStatus.OK);
     res.json(questionanswers);
@@ -214,14 +216,52 @@ exports.todaysengagement = async (req, res, next) => {
   const engagements = await EngagementActivity.list({
     date: new Date().toDateString(),
   });
-  const allquestionanswers = engagements.map((engagement) => {
-    const questionanswers = engagement.questionanswers.filter(
-      (qa) => qa.answerPersonName !== req.user.name,
-    );
-    return {
-      _id: engagement._id,
-      questionanswers,
-    };
-  });
+  const allquestionanswers = await Promise.all(
+    engagements.map(async (engagement) => {
+      const questionanswers = engagement.questionanswers.filter(
+        (qa) => qa.answerPersonName !== req.user.name
+      );
+
+      // const qaresp = [];
+      // for(const qa of questionanswers) {
+      //     GuessWhoResponse.find({engagementActivityId: engagement.id, guessWhoUserId: qa.answerPersonId}).exec().then(resp => {
+      //       console.log("test", resp);
+      //       qaresp.push({
+      //         ...questionanswers[i],
+      //         response: resp.length > 0  ? resp[0].response : ""
+      //       })
+      //     });
+      // }
+
+      //const arr = [1, 2, 3];
+      const qaresp = await Promise.all(
+        questionanswers.map(async (qa) => {
+          const resp = await GuessWhoResponse.find({
+            engagementActivityId: engagement.id,
+            guessWhoUserId: qa.answerPersonId,
+          }).exec();
+          return {
+            ...qa,
+            response: resp.length > 0 ? resp[0].response : "",
+          };
+        })
+      );
+      return {
+        _id: engagement._id,
+        questionanswers: qaresp,
+      };
+    })
+  );
   res.json(allquestionanswers);
+};
+
+exports.saveResponse = async (req, res, next) => {
+  try {
+    const userGuess = new GuessWhoResponse(req.body);
+    userGuess.save();
+    res.status(httpStatus.OK);
+    res.end();
+  } catch (error) {
+    next(error);
+  }
 };
