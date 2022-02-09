@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 /**
- * Engagement Types
- */
+* Engagement Types
+*/
+const engagementTypes = ['online', 'riddle', 'guesswho', 'mcq'];
 
 /**
  * Engagement Activity Schema
@@ -22,6 +23,11 @@ const guessWhoResponseSchema = new mongoose.Schema({
   },
   engagementActivityDescription: {
     type: String,
+  },
+  engagementActivityType: {
+    type: String,
+    enum: engagementTypes,
+    default: 'guesswho',
   },
   score: {
     type: Number,
