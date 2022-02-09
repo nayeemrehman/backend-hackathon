@@ -1,12 +1,9 @@
-const mongoose = require("mongoose");
-const httpStatus = require("http-status");
-// const crypto = require('crypto');
-// const moment = require('moment-timezone');
-const APIError = require("../errors/api-error");
+const mongoose = require('mongoose');
 
 /**
- * Engagement Types
- */
+* Engagement Types
+*/
+const engagementTypes = ['online', 'riddle', 'guesswho', 'mcq'];
 
 /**
  * Engagement Activity Schema
@@ -20,6 +17,17 @@ const guessWhoResponseSchema = new mongoose.Schema({
   engagementActivityId: {
     type: String,
     required: true,
+  },
+  engagementActivityName: {
+    type: String,
+  },
+  engagementActivityDescription: {
+    type: String,
+  },
+  engagementActivityType: {
+    type: String,
+    enum: engagementTypes,
+    default: 'guesswho',
   },
   score: {
     type: Number,
@@ -64,7 +72,7 @@ guessWhoResponseSchema.statics = {
  * @typedef GuessWhoResponse
  */
 const GuessWhoResponse = mongoose.model(
-  "GuessWhoResponse",
-  guessWhoResponseSchema
+  'GuessWhoResponse',
+  guessWhoResponseSchema,
 );
 module.exports = GuessWhoResponse;
