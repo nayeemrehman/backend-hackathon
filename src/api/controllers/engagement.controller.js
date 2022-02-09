@@ -239,6 +239,7 @@ exports.todaysengagement = async (req, res, next) => {
           const resp = await GuessWhoResponse.find({
             engagementActivityId: engagement.id,
             guessWhoUserId: qa.answerPersonId,
+            userId: req.user.id,
           }).exec();
           return {
             ...qa,
@@ -300,7 +301,7 @@ exports.getScoreAndRecentActivities = async (req, res, next) => {
     const recentEngagements = await GuessWhoResponse.find({userId : req.user.id}).sort({date: -1}).limit(3);
 
     res.status(httpStatus.OK);
-    res.json({"score": score[0].sum, "recentEngagements": recentEngagements});
+    res.json({"score": score.length > 0 ? score[0].sum : 0, "recentEngagements": recentEngagements});
   } catch (error) {
     next(error)
   }
