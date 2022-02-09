@@ -258,10 +258,75 @@ exports.todaysengagement = async (req, res, next) => {
 exports.saveResponse = async (req, res, next) => {
   try {
     const userGuess = new GuessWhoResponse(req.body);
-    userGuess.save();
+    const engagement = await EngagementActivity.get(userGuess.engagementActivityId);
+    const qa = engagement.questionanswers.find(cqa => cqa.answerPersonId === userGuess.guessWhoUserId)
+    if(qa){
+      if(qa.answerPersonName === userGuess.response){
+        userGuess.guess = true;
+        userGuess.score = 20;
+      }
+      else{
+        userGuess.guess = false;
+        userGuess.score = 10;
+      }
+    }
+
+    userGuess.engagementActivityName = engagement.name;
+    userGuess.engagementActivityDescription = engagement.description;
+    const savedUserGuess = await userGuess.save();
     res.status(httpStatus.OK);
-    res.end();
+    res.json(savedUserGuess);
   } catch (error) {
     next(error);
   }
 };
+
+exports.getScoreAndRecentActivities = async (req, res, next) => {
+  try {
+    const score = await GuessWhoResponse.aggregate([
+      {
+        $match: {
+          "userId": req.user.id
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          sum: { $sum: "$score" }
+        }
+      }
+    ]);
+
+    const recentEngagements = await GuessWhoResponse.find({userId : req.user.id}).sort({date: -1}).limit(3);
+
+    res.status(httpStatus.OK);
+    res.json({"score": score[0].sum, "recentEngagements": recentEngagements});
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.getScoreAndAllActivities = async (req, res, next) => {
+  try {
+    const score = await GuessWhoResponse.aggregate([
+      {
+        $match: {
+          "userId": req.user.id
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          sum: { $sum: "$score" }
+        }
+      }
+    ]);
+
+    const recentEngagements = await GuessWhoResponse.find({userId : req.user.id}).sort({date: -1});
+
+    res.status(httpStatus.OK);
+    res.json({"score": score[0].sum, "recentEngagements": recentEngagements});
+  } catch (error) {
+    next(error)
+  }
+}
