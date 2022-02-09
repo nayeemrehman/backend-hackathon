@@ -75,13 +75,13 @@ const userSchema = new mongoose.Schema({
     state: {
       type: String,
       trim: true,
-      minlength: 3,
+      minlength: 2,
       maxlength: 100,
     },
     country: {
       type: String,
       trim: true,
-      minlength: 3,
+      minlength: 2,
       maxlength: 100,
     },
   },
