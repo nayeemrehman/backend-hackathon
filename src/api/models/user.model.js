@@ -112,6 +112,10 @@ const userSchema = new mongoose.Schema({
     music: String,
     sports: String,
   },
+  engagementScore: {
+    type: Number,
+    default: 0,
+  },
 }, {
   timestamps: true,
 });
