@@ -19,8 +19,11 @@ router.route('/getScoreAndRecentActivities').get(authorize(), controller.getScor
 
 router.route('/getScoreAndAllActivities').get(authorize(), controller.getScoreAndAllActivities);
 
+router.route('/dashboardDetails').get(authorize(ADMIN), controller.dashboardDetails);
+
 router
   .route('/')
+  .get(authorize(ADMIN), controller.list)
   .post(authorize(ADMIN), validate(createEngagement), controller.create);
 
 router
