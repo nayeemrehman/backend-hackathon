@@ -1,7 +1,9 @@
 const httpStatus = require('http-status');
 const { omit } = require('lodash');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user.model');
-
 /**
  * Load user and append to req.
  * @public
@@ -70,6 +72,14 @@ exports.replace = async (req, res, next) => {
 exports.update = (req, res, next) => {
   const ommitRole = req.locals.user.role !== 'admin' ? 'role' : '';
   const updatedUser = omit(req.body, ommitRole);
+  if (updatedUser.picture) {
+    const { picture } = updatedUser;
+    const buffer = Buffer.from(picture, 'base64');
+    const newUUid = `${uuidv4()}.jpeg`;
+    fs.writeFileSync(path.join(__dirname, '../../..', 'public', 'images', newUUid), buffer);
+    const picturePath = path.join('static', 'images', newUUid);
+    updatedUser.picture = picturePath;
+  }
   const user = Object.assign(req.locals.user, updatedUser);
 
   user.save()
