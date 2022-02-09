@@ -95,6 +95,10 @@ const userSchema = new mongoose.Schema({
   interests: {
     type: [String],
   },
+  engagementScore: {
+    type: Number,
+    default: 0,
+  },
 }, {
   timestamps: true,
 });

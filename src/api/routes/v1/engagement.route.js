@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('express-validation');
 const controller = require('../../controllers/engagement.controller');
-const { authorize, ADMIN, LOGGED_USER } = require('../../middlewares/auth');
+const { authorize, ADMIN } = require('../../middlewares/auth');
 const {
   createEngagement,
 } = require('../../validations/engagement.validation');
@@ -12,6 +12,10 @@ const router = express.Router();
  * Load user when API with userId route parameter is hit
  */
 router.param('engagementId', controller.load);
+
+// router
+//   .route('/guesswho')
+//   .get(authorize(), controller.guesswho);
 
 router
   .route('/')
@@ -86,7 +90,7 @@ router
    * @apiError (Forbidden 403)    Forbidden    Only user with same id or admins can access the data
    * @apiError (Not Found 404)    NotFound     User does not exist
    */
-  .get(authorize(LOGGED_USER), controller.get);
+  .get(authorize(), controller.get);
 //   /**
 //    * @api {put} v1/users/:id Replace User
 //    * @apiDescription Replace the whole user document with a new one
@@ -163,5 +167,8 @@ router
 //    * @apiError (Not Found 404)    NotFound      User does not exist
 //    */
 //   .delete(authorize(LOGGED_USER), controller.remove);
+router
+  .route('/:engagementId/guesswho')
+  .get(authorize(), controller.guesswho);
 
 module.exports = router;

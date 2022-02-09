@@ -27,6 +27,17 @@ const engagementActivitySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  date: {
+    type: String,
+    default: new Date().toDateString(),
+  },
+  time: {
+    type: String,
+    default: new Date().toTimeString(),
+  },
+  questionanswers: {
+    type: [Object],
+  },
 });
 
 engagementActivitySchema.statics = {
